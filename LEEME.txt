@@ -1,0 +1,15 @@
+AMAURA FOTOS V1.2 — corrección de impresión en iPhone
+
+Qué cambió:
+- La foto se carga como dato interno compatible con Safari.
+- El botón abre una hoja limpia en una pestaña nueva.
+- En esa hoja aparece un botón “Imprimir”.
+- Esto evita el problema de que iPhone no responda al imprimir desde una web añadida a inicio.
+
+Actualización en Netlify:
+1. Descomprime este ZIP.
+2. Sube la carpeta a Netlify reemplazando la versión anterior.
+3. Abre el enlace en Safari.
+4. Elige una foto.
+5. Toca “Abrir hoja para imprimir”.
+6. En la hoja nueva, toca “Imprimir”.

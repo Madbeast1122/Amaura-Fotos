@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Amaura Fotos V1</title>
+<style>
+  :root{
+    --bg:#f5f2ec;
+    --card:#ffffff;
+    --text:#171717;
+    --muted:#6e6e6e;
+    --gold:#b8924b;
+    --line:#d9d4ca;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .app{
+    max-width:760px;
+    margin:0 auto;
+    padding:18px 14px 32px;
+  }
+  .brand{
+    text-align:center;
+    margin:4px 0 16px;
+  }
+  .brand h1{
+    margin:0;
+    letter-spacing:.12em;
+    font-size:24px;
+  }
+  .brand p{
+    margin:6px 0 0;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.05);
+  }
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  button,.file-label{
+    min-height:46px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--text);
+    font-weight:700;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 12px;
+    cursor:pointer;
+    text-align:center;
+  }
+  button.active{
+    border-color:var(--gold);
+    box-shadow:inset 0 0 0 2px rgba(184,146,75,.22);
+  }
+  button.primary{
+    width:100%;
+    background:#171717;
+    color:white;
+    border-color:#171717;
+    margin-top:12px;
+  }
+  button.secondary{
+    width:100%;
+    margin-top:10px;
+  }
+  input[type=file]{display:none}
+  .controls{
+    margin-top:14px;
+    display:none;
+  }
+  .control{
+    margin:12px 0;
+  }
+  .control label{
+    display:flex;
+    justify-content:space-between;
+    font-size:14px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  input[type=range]{width:100%}
+  .hint{
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.45;
+    margin:10px 0 0;
+  }
+
+  /* Vista previa */
+  .preview-wrap{
+    margin-top:16px;
+    overflow:auto;
+    background:#ddd8cf;
+    border-radius:14px;
+    padding:10px;
+  }
+  .sheet{
+    width:210mm;
+    height:297mm;
+    background:white;
+    position:relative;
+    margin:auto;
+    transform-origin:top left;
+    box-shadow:0 6px 18px rgba(0,0,0,.12);
+  }
+  .photo-circle{
+    position:absolute;
+    width:38.6mm;
+    height:38.6mm;
+    border-radius:50%;
+    overflow:hidden;
+    border:.25mm solid #111;
+    background:#f0f0f0;
+  }
+  .photo-circle img{
+    position:absolute;
+    left:50%;
+    top:50%;
+    max-width:none;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+    transform-origin:center center;
+  }
+  .event-1{left:45.7mm; top:35mm;}
+  .event-2{left:125.7mm; top:35mm;}
+
+  .home-grid{
+    display:grid;
+    grid-template-columns:repeat(4,38.6mm);
+    grid-auto-rows:38.6mm;
+    gap:8mm 8mm;
+    position:absolute;
+    left:15.8mm;
+    top:18mm;
+  }
+  .home-grid .photo-circle{
+    position:relative;
+    left:auto; top:auto;
+  }
+  .mode-label{
+    position:absolute;
+    bottom:7mm;
+    left:0;
+    right:0;
+    text-align:center;
+    font-size:3.3mm;
+    color:#777;
+  }
+  .empty-text{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:4mm;
+    font-size:4mm;
+    color:#777;
+    pointer-events:none;
+  }
+
+  @media print{
+    @page{ size:A4 portrait; margin:0; }
+    body{ background:white; }
+    .app > *:not(.preview-wrap){ display:none !important; }
+    .preview-wrap{
+      margin:0;
+      padding:0;
+      background:white;
+      overflow:visible;
+      border-radius:0;
+    }
+    .sheet{
+      width:210mm;
+      height:297mm;
+      transform:none !important;
+      box-shadow:none;
+      margin:0;
+      page-break-after:avoid;
+    }
+    .mode-label{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <h1>AMAURA FOTOS</h1>
+    <p>Plantilla para llaveros · 3,86 cm</p>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <button id="eventBtn" class="active" type="button">Modo evento · 2 fotos</button>
+      <button id="homeBtn" type="button">Modo casa · hoja completa</button>
+    </div>
+
+    <label class="file-label" for="photoInput">📷 Elegir foto o abrir cámara</label>
+    <input id="photoInput" type="file" accept="image/*" />
+
+    <div id="controls" class="controls">
+      <div class="control">
+        <label><span>Zoom</span><span id="zoomValue">100%</span></label>
+        <input id="zoom" type="range" min="100" max="280" value="100" step="1" />
+      </div>
+      <div class="control">
+        <label><span>Mover horizontal</span><span id="xValue">0</span></label>
+        <input id="posX" type="range" min="-100" max="100" value="0" step="1" />
+      </div>
+      <div class="control">
+        <label><span>Mover vertical</span><span id="yValue">0</span></label>
+        <input id="posY" type="range" min="-100" max="100" value="0" step="1" />
+      </div>
+      <button id="resetBtn" class="secondary" type="button">Centrar de nuevo</button>
+    </div>
+
+    <button id="printBtn" class="primary" type="button">🖨️ Abrir hoja para imprimir</button>
+    <p class="hint">
+      Se abrirá una hoja nueva. Allí toca “Imprimir”. Usa A4, escala 100% o tamaño real y desactiva “ajustar a página”.
+    </p>
+  </div>
+
+  <div class="preview-wrap">
+    <div id="sheet" class="sheet">
+      <div id="eventLayout">
+        <div class="photo-circle event-1"><div class="empty-text">Foto 1</div><img alt=""></div>
+        <div class="photo-circle event-2"><div class="empty-text">Foto 2</div><img alt=""></div>
+      </div>
+      <div id="homeLayout" class="home-grid" style="display:none"></div>
+      <div id="modeLabel" class="mode-label">Vista previa · Modo evento</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const eventBtn = document.getElementById('eventBtn');
+  const homeBtn = document.getElementById('homeBtn');
+  const photoInput = document.getElementById('photoInput');
+  const controls = document.getElementById('controls');
+  const zoom = document.getElementById('zoom');
+  const posX = document.getElementById('posX');
+  const posY = document.getElementById('posY');
+  const zoomValue = document.getElementById('zoomValue');
+  const xValue = document.getElementById('xValue');
+  const yValue = document.getElementById('yValue');
+  const resetBtn = document.getElementById('resetBtn');
+  const printBtn = document.getElementById('printBtn');
+  const eventLayout = document.getElementById('eventLayout');
+  const homeLayout = document.getElementById('homeLayout');
+  const modeLabel = document.getElementById('modeLabel');
+  const sheet = document.getElementById('sheet');
+  const previewWrap = document.querySelector('.preview-wrap');
+
+  let mode = 'event';
+  let imageURL = '';
+  let naturalW = 1, naturalH = 1;
+
+  function createHomeGrid(){
+    homeLayout.innerHTML = '';
+    for(let i=0;i<24;i++){
+      const c = document.createElement('div');
+      c.className='photo-circle';
+      const e=document.createElement('div');
+      e.className='empty-text';
+      e.textContent=String(i+1);
+      const img=document.createElement('img');
+      img.alt='';
+      c.appendChild(e);
+      c.appendChild(img);
+      homeLayout.appendChild(c);
+    }
+  }
+  createHomeGrid();
+
+  function allCircles(){
+    return [...document.querySelectorAll('.photo-circle')];
+  }
+
+  function setMode(next){
+    mode = next;
+    const isEvent = mode === 'event';
+    eventLayout.style.display = isEvent ? 'block' : 'none';
+    homeLayout.style.display = isEvent ? 'none' : 'grid';
+    eventBtn.classList.toggle('active', isEvent);
+    homeBtn.classList.toggle('active', !isEvent);
+    modeLabel.textContent = isEvent ? 'Vista previa · Modo evento' : 'Vista previa · Modo casa';
+    applyImage();
+  }
+
+  function fitScaleForCircle(circle){
+    const circlePx = circle.clientWidth;
+    const base = Math.max(circlePx / naturalW, circlePx / naturalH);
+    return base * (Number(zoom.value)/100);
+  }
+
+  function applyImage(){
+    allCircles().forEach(circle => {
+      const img = circle.querySelector('img');
+      const empty = circle.querySelector('.empty-text');
+      if(!imageURL){
+        img.removeAttribute('src');
+        empty.style.display='flex';
+        return;
+      }
+      empty.style.display='none';
+      if(img.src !== imageURL) img.src = imageURL;
+      const scale = fitScaleForCircle(circle);
+      const dx = Number(posX.value) / 100 * circle.clientWidth * 0.6;
+      const dy = Number(posY.value) / 100 * circle.clientHeight * 0.6;
+      img.style.width = naturalW + 'px';
+      img.style.height = naturalH + 'px';
+      img.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${scale})`;
+    });
+    zoomValue.textContent = zoom.value + '%';
+    xValue.textContent = posX.value;
+    yValue.textContent = posY.value;
+  }
+
+  photoInput.addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      imageURL = reader.result;
+      const probe = new Image();
+      probe.onload = () => {
+        naturalW = probe.naturalWidth || probe.width;
+        naturalH = probe.naturalHeight || probe.height;
+        controls.style.display='block';
+        zoom.value=100; posX.value=0; posY.value=0;
+        applyImage();
+      };
+      probe.src = imageURL;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  [zoom,posX,posY].forEach(el=>el.addEventListener('input',applyImage));
+  resetBtn.addEventListener('click',()=>{
+    zoom.value=100; posX.value=0; posY.value=0; applyImage();
+  });
+  eventBtn.addEventListener('click',()=>setMode('event'));
+  homeBtn.addEventListener('click',()=>setMode('home'));
+  printBtn.addEventListener('click',()=>{
+    if(!imageURL){
+      alert('Primero elige una foto.');
+      return;
+    }
+
+    // En iPhone, imprimir directamente desde una web añadida a inicio puede no responder.
+    // Abrimos una hoja limpia en una nueva pestaña y desde ahí se imprime o comparte.
+    const printable = document.getElementById('sheet').cloneNode(true);
+    printable.style.transform = 'none';
+    printable.style.boxShadow = 'none';
+    printable.querySelectorAll('.mode-label').forEach(el => el.remove());
+
+    const printWindow = window.open('', '_blank');
+    if(!printWindow){
+      alert('Safari bloqueó la ventana. Permite ventanas emergentes para este sitio e inténtalo de nuevo.');
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Amaura Fotos - Imprimir</title>
+<style>
+  @page{size:A4 portrait;margin:0}
+  html,body{margin:0;padding:0;background:#fff}
+  .sheet{width:210mm;height:297mm;background:#fff;position:relative;margin:0}
+  .photo-circle{position:absolute;width:38.6mm;height:38.6mm;border-radius:50%;overflow:hidden;border:.25mm solid #111;background:#f0f0f0}
+  .photo-circle img{position:absolute;left:50%;top:50%;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none;transform-origin:center center}
+  .event-1{left:45.7mm;top:35mm}.event-2{left:125.7mm;top:35mm}
+  .home-grid{display:grid;grid-template-columns:repeat(4,38.6mm);grid-auto-rows:38.6mm;gap:8mm 8mm;position:absolute;left:15.8mm;top:18mm}
+  .home-grid .photo-circle{position:relative;left:auto;top:auto}
+  .empty-text{display:none}
+  .toolbar{position:fixed;left:0;right:0;bottom:0;padding:12px;background:rgba(255,255,255,.96);border-top:1px solid #ddd;display:flex;gap:10px;z-index:999}
+  .toolbar button{flex:1;min-height:46px;border-radius:12px;border:1px solid #111;background:#111;color:#fff;font-weight:700;font-size:16px}
+  .toolbar button.secondary{background:#fff;color:#111}
+  @media print{.toolbar{display:none}}
+</style>
+</head>
+<body>
+${printable.outerHTML}
+<div class="toolbar">
+  <button onclick="window.print()">Imprimir</button>
+  <button class="secondary" onclick="window.close()">Volver</button>
+</div>
+</body>
+</html>`);
+    printWindow.document.close();
+  });
+
+  function resizePreview(){
+    const available = previewWrap.clientWidth - 20;
+    const scale = Math.min(1, available / sheet.offsetWidth);
+    sheet.style.transform = `scale(${scale})`;
+    previewWrap.style.height = (sheet.offsetHeight * scale + 20) + 'px';
+  }
+  window.addEventListener('resize', resizePreview);
+  window.addEventListener('load', resizePreview);
+  setTimeout(resizePreview,100);
+})();
+</script>
+</body>
+</html>
