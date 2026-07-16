@@ -16,6 +16,6 @@
     "@capacitor/ios": "^8.4.2"
   },
   "devDependencies": {
-    "typescript": "^7.0.2"
+    "typescript": "^5.8.2"
   }
 }
