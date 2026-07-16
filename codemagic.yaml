@@ -9,11 +9,15 @@ workflows:
     scripts:
       - name: Install dependencies
         script: |
-          npm install
+          npm ci
+
+      - name: Fix Capacitor permissions
+        script: |
+          chmod +x ./node_modules/.bin/capacitor
 
       - name: Sync Capacitor
         script: |
-          npx cap sync ios
+          ./node_modules/.bin/capacitor sync ios
 
     artifacts:
       - ios/App/build/**/*.ipa
