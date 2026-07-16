@@ -1,0 +1,18 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+
+    environment:
+      xcode: latest
+      cocoapods: default
+      node: 20
+
+    scripts:
+      - npm install
+      - npx cap sync ios
+      - cd ios/App
+      - pod install
+
+    artifacts:
+      - ios/App/build/**/*.ipa
+      - /tmp/xcodebuild_logs/*.log
